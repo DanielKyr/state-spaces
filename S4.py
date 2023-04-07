@@ -15,7 +15,7 @@ if tuple(map(int, torch.__version__.split('.')[:2])) >= (1, 12):
     dropout_fn = nn.Dropout1d
 else:
     dropout_fn = nn.Dropout2d
-    
+
 class S4Model(nn.Module):
 
     def __init__(
@@ -87,7 +87,7 @@ class S4Model(nn.Module):
 
         return x
 
-def setup_optimizer(model, lr, weight_decay, epochs):
+def setup_optimizer(model, lr, weight_decay, epochs, verbose=False):
     """
     S4 requires a specific optimizer setup.
 
@@ -123,12 +123,13 @@ def setup_optimizer(model, lr, weight_decay, epochs):
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, epochs)
 
     # Print optimizer info
-    keys = sorted(set([k for hp in hps for k in hp.keys()]))
-    for i, g in enumerate(optimizer.param_groups):
-        group_hps = {k: g.get(k, None) for k in keys}
-        print(' | '.join([
-            f"Optimizer group {i}",
-            f"{len(g['params'])} tensors",
-        ] + [f"{k} {v}" for k, v in group_hps.items()]))
+    if verbose:
+        keys = sorted(set([k for hp in hps for k in hp.keys()]))
+        for i, g in enumerate(optimizer.param_groups):
+            group_hps = {k: g.get(k, None) for k in keys}
+            print(' | '.join([
+                f"Optimizer group {i}",
+                f"{len(g['params'])} tensors",
+            ] + [f"{k} {v}" for k, v in group_hps.items()]))
 
     return optimizer, scheduler
